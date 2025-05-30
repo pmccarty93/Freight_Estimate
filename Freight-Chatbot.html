@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> BGR Freight Quote estimate</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #chatbox { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+    .user { color: black; }
+    .bot { color: red; }
+  </style>
+</head>
+<body>
+  <h2>BGR Freight Estimate</h2>
+  <div id="chatbox"></div>
+  <input type="text" id="userInput" placeholder="Type here..." onkeydown="if(event.key==='Enter') sendMessage()" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const userInput = document.getElementById('userInput');
+
+    let step = 0;
+    let shipment = {};
+
+    function botReply(text) {
+      chatbox.innerHTML += `<div class="bot"><b>Bot:</b> ${text}</div>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function userReply(text) {
+      chatbox.innerHTML += `<div class="user"><b>You:</b> ${text}</div>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      userReply(text);
+      userInput.value = '';
+
+      switch (step) {
+        case 0:
+          shipment.origin = text;
+          botReply("What's the destination ZIP code?");
+          step++;
+          break;
+        case 1:
+          shipment.destination = text;
+          botReply("What's the total weight in lbs?");
+          step++;
+          break;
+        case 2:
+          shipment.weight = parseFloat(text);
+          botReply("What are the box dimensions? (L x W x H in inches)");
+          step++;
+          break;
+        case 3:
+          shipment.dimensions = text;
+          botReply("What's the freight commodity? (e.g., paper goods)");
+          step++;
+          break;
+        case 4:
+          shipment.commodity = text;
+          const estimate = Math.round(150 + (shipment.weight / 10));
+          botReply(`Thanks! Estimated cost: $${estimate} - $${estimate + 75}. For a formal quote, please contact our team.`);
+          step++;
+          break;
+        default:
+          botReply("Would you like to start another quote? (yes/no)");
+          if (text.toLowerCase() === 'yes') {
+            step = 0;
+            shipment = {};
+            botReply("What’s the origin ZIP code?");
+          }
+          break;
+      }
+    }
+
+    // Start the chatbot
+    botReply("Welcome! Let's get you a freight estimate. What’s the origin ZIP code?");
+  </script>
+</body>
+</html>
